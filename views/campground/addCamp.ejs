@@ -1,0 +1,32 @@
+<% layout("layouts/boilerplate")%>
+
+    <div class="row">
+        <h1 class="text-center">New Campground</h1>
+        <div class="col-6 offset-3">
+            <form action="/campground" method="post">
+
+                <div class="mb-3">
+                    <label class="form-label" for="title">Title:</label><input class="form-control" type="text"
+                        name="title" id="">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="price">Price:</label>
+                    <div class="input-group">
+                        <span class="input-group-text">$</span><input class="form-control" type="number" name="price"
+                            placeholder="0.0">
+
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="description">Description:</label><textarea class="form-control"
+                        rows="5" cols="25" name="description" id=""></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="location">Location:</label><input class="form-control" type="text" name="location"
+                        id="">
+                </div>
+                <button class="btn btn-success">Add</button>
+            </form>
+        </div>
+
+    </div>

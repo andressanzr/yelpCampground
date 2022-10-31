@@ -1,0 +1,27 @@
+<% layout("layouts/boilerplate")%>
+    <div class="container">
+        <div class="row">
+            <div class="col-6 offset-3">
+                <div class="card mt-3 mb-3">
+                    <img src="<%= camp.image %>" class="card-img-top" alt="campground">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <%= camp.title %>
+                        </h5>
+                        <p class="card-text">
+                            <%= camp.description %>
+                        </p>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <%= camp.price %>$
+                        </li>
+                        <li class="list-group-item">
+                            <%= camp.location%>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
