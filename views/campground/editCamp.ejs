@@ -2,18 +2,24 @@
 
     <div class="row">
         <h1 class="text-center">Update Campground</h1>
-        <div class="col-6 offset-3">
-            <form action="/campground/update" method="post">
+        <div class="col-6 offset-3 mb-3">
+            <form action="/campground/update" method="post" class="needs-validation" novalidate>
                 <input type="hidden" name="campId" id="" value="<%= camp._id %>">
                 <div class="mb-3">
                     <label class="form-label" for="title">Title:</label><input class="form-control" type="text"
-                        name="title" id="" value="<%= camp.title %>">
+                        name="title" id="" value="<%= camp.title %>" required>
+                    <div class="valid-feedback">
+                        OK!
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="price">Price:</label>
                     <div class="input-group">
                         <span class="input-group-text">$</span><input class="form-control" type="number" name="price"
-                            placeholder="0.0" value="<%= camp.price %>">
+                            placeholder="0.0" value="<%= camp.price %>" required>
+                        <div class="valid-feedback">
+                            OK!
+                        </div>
 
                     </div>
                 </div>
@@ -23,7 +29,17 @@
                 </div>
                 <div class="mb-3">
                     <label for="location">Location:</label><input class="form-control" type="text" name="location" id=""
-                        value="<%= camp.location %>">
+                        value="<%= camp.location %>" required>
+                    <div class="valid-feedback">
+                        OK!
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="location">Image URL:</label><input class="form-control" type="text" name="image" id=""
+                        value="<%= camp.image %>" required>
+                    <div class="invalid-feedback">
+                        Please insert an Image URL:
+                    </div>
                 </div>
                 <button class="btn btn-info">Update</button>
             </form>

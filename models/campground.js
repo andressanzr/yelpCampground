@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const CampgroundSchema = new Schema({
-  title: String,
-  price: String,
+  title: { type: String, required: true },
+  price: { type: String, required: true },
   description: String,
-  location: String,
+  location: { type: String, required: true },
   image: String,
 });
 
