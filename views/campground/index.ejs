@@ -1,9 +1,9 @@
 <% layout("layouts/boilerplate")%>
     <div class="container mt-20">
-        <h1>All Camps</h1>
+        <h1 class="m-3">All Camps</h1>
 
         <% for(let camp of camps) { %>
-            <div class="card">
+            <div class="card m-3">
                 <div class="row">
                     <div class="col-md-4">
                         <img src="<%= camp.image %>" alt="Camp foto" class="img-fluid">
@@ -19,10 +19,11 @@
                             <p class="card-text text-muted">
                                 <%= camp.location %>
                             </p>
-                            <a href="/campground/<%=camp._id%>"><button class="btn btn-primary">View</button></a>
+                            <a href="/campground/view/<%=camp._id%>"><button class="btn btn-primary">View</button></a>
                             <a href="/campground/edit/<%=camp._id%>"><button class="btn btn-secondary">Edit</button></a>
-                            <a href="/campground/delete/<%=camp._id%>"><button
-                                    class="btn btn-danger">Delete</button></a>
+                            <form action="/campground/delete/<%=camp._id%>" class="d-inline" method="post"><button
+                                    class="btn btn-danger" type="submit">Delete</button></form>
+
                         </div>
                     </div>
                 </div>

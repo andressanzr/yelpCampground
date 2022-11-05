@@ -10,15 +10,13 @@ const ExpressError = require("./utilities/ExpressError");
 const router = express.Router();
 
 const campgroundRouter = require(path.join(__dirname, "./router/campground"));
-const Campground = require("./models/campground");
 
 const app = express();
 
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 app.use(morgan("tiny"));
 
 // db url

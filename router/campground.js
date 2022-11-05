@@ -3,13 +3,25 @@ const mongoose = require("mongoose");
 const path = require("path");
 const Joi = require("joi");
 const Campground = require(path.join(__dirname, "../models/campground"));
+const Review = require(path.join(__dirname, "../models/review"));
 const catchAsync = require("../utilities/catchAsync");
 const ExpressError = require("../utilities/ExpressError");
-const CampgroundJoiSchema = require("../schemas/schemas");
+const { CampgroundJoiSchema, ReviewJoiSchema } = require("../schemas/schemas");
+
 const router = express.Router();
 
 const validateCampground = (req, res, next) => {
+  console.log(req.body);
   const { error } = CampgroundJoiSchema.validate(req.body);
+  if (error) {
+    var msg = error.details.map((e) => e.message).join(",");
+    throw new ExpressError(msg, 400);
+  } else {
+    next();
+  }
+};
+const validateReview = (req, res, next) => {
+  const { error } = ReviewJoiSchema.validate(req.body);
   if (error) {
     var msg = error.details.map((e) => e.message).join(",");
     throw new ExpressError(msg, 400);
@@ -30,35 +42,51 @@ router.get(
   })
 );
 // delete a camp
-router.get(
+router.post(
   "/delete/:id",
-  catchAsync(async (req, res) => {
+  catchAsync(async (req, res, next) => {
     await Campground.findByIdAndDelete(req.params.id);
-    res.redirect("/campground/");
+    res.redirect("/campground");
   })
 );
-// get all camps
-router.get(
-  "/",
-  catchAsync(async (req, res) => {
-    const camps = await Campground.find();
-    res.render("campground/index", { camps });
-  })
-);
+
 // update a camp
 router.post(
-  "/update",
+  "/:id/update",
   validateCampground,
   catchAsync(async (req, res) => {
-    const { title, price, description, location, image, campId } = req.body;
-    await Campground.findByIdAndUpdate(campId, {
-      title,
-      price,
-      description,
-      location,
-      image,
-    });
+    const { id } = req.params;
+    await Campground.findByIdAndUpdate(id, req.body.campground);
     res.redirect("/campground/");
+  })
+);
+// add a review to a camp
+router.post(
+  "/:id/review",
+  validateReview,
+  catchAsync(async (req, res, next) => {
+    const id = req.params.id;
+    const { review } = req.body;
+    const camp = await Campground.findById(id);
+    const rev = new Review(review);
+    camp.reviews.push(rev);
+    await camp.save();
+    await rev.save();
+    res.redirect(`/campground/view/${camp._id}`);
+  })
+);
+// add a review to a camp
+router.post(
+  "/:id/review/delete",
+  catchAsync(async (req, res, next) => {
+    const idCamp = req.params.id;
+    const { id } = req.body.review;
+    const idReview = mongoose.Types.ObjectId.createFromHexString(id);
+    await Campground.findByIdAndUpdate(idCamp, {
+      $pull: { reviews: idReview },
+    });
+    await Review.findOneAndDelete(idReview);
+    res.redirect(`/campground/view/${idCamp}`);
   })
 );
 // add a new camp and save in the db
@@ -66,12 +94,13 @@ router.post(
   "/",
   validateCampground,
   catchAsync(async (req, res, next) => {
-    const { title, price, description, location, image } = req.body;
-    new Campground({ title, price, description, location, image })
+    //const { title, price, description, location, image } = req.body;
+    const { campground } = req.body;
+    new Campground(campground)
       .save()
       .then((data) => {
         console.log(data);
-        res.redirect(`campground/${data._id}`);
+        res.redirect(`campground/view/${data._id}`);
       })
       .catch((err) => {
         console.log(err);
@@ -81,11 +110,12 @@ router.post(
 );
 // get an specific camp
 router.get(
-  "/:id",
+  "/view/:id",
   catchAsync(async (req, res) => {
     let camp;
     mongoose.isValidObjectId(req.params.id)
       ? Campground.findById(req.params.id)
+          .populate("reviews")
           .then((data) => {
             camp = data;
             res.render("campground/viewCamp", { camp });
@@ -94,6 +124,14 @@ router.get(
             res.write("Error: " + err);
           })
       : res.redirect("/campground/");
+  })
+);
+// get all camps
+router.get(
+  "/",
+  catchAsync(async (req, res) => {
+    const camps = await Campground.find();
+    res.render("campground/index", { camps });
   })
 );
 // not found route handler
