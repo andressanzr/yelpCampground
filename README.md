@@ -2,11 +2,12 @@
 
 Web app that displays information about available camping places in the US.
 Tech stack:
-*Node.js
-*Express
-*MongoDB
-*Mongoose
-\*EJS
+
+- Node.js
+- Express
+- MongoDB
+- Mongoose
+- EJS
 
 # Steps to run the App
 
