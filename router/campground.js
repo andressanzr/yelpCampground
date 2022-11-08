@@ -23,7 +23,12 @@ const validateCampground = (req, res, next) => {
 
 // get the add camp form
 router.get("/addCamp", (req, res) => {
-  res.render("campground/addCamp");
+  if (!req.isAuthenticated()) {
+    req.flash("error", "You must be signed in");
+    res.redirect("/login");
+  } else {
+    res.render("campground/addCamp");
+  }
 });
 // get the camp´s edit form
 router.get(
@@ -38,7 +43,6 @@ router.post(
   "/delete/:id",
   catchAsync(async (req, res, next) => {
     await Campground.findByIdAndDelete(req.params.id);
-    writ;
     res.redirect("/campground");
   })
 );

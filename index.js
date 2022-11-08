@@ -2,16 +2,17 @@ const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
 const flash = require("connect-flash");
-const bodyParser = require("body-parser");
 const ejsMate = require("ejs-mate");
 const morgan = require("morgan");
-const catchAsync = require("./utilities/catchAsync");
 const ExpressError = require("./utilities/ExpressError");
 const session = require("express-session");
-const router = express.Router();
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
 
 const campgroundRouter = require(path.join(__dirname, "router/campground"));
 const reviewRouter = require(path.join(__dirname, "router/review"));
+const userRouter = require(path.join(__dirname, "router/user"));
+const User = require(path.join(__dirname, "models/user"));
 
 const app = express();
 const sessionConfig = {
@@ -31,7 +32,11 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("tiny"));
-
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 // db url
 const url = "mongodb://localhost:27017/yelpCamp";
 
@@ -50,10 +55,17 @@ app.use((req, res, next) => {
   res.locals.error = req.flash("error");
   next();
 });
+
 // route handler
 app.use("/campground/:id/review", reviewRouter);
 app.use("/campground", campgroundRouter);
+app.use("/", userRouter);
 
+app.get("/newUser", async (req, res) => {
+  const newUser = new User({ email: "andresd@gm.de", username: "Nandres" });
+  const myUser = await User.register(newUser, "1234");
+  res.send(myUser);
+});
 app.get("/", (req, res, next) => {
   res.redirect("/campground");
 });
