@@ -1,18 +1,31 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
+const flash = require("connect-flash");
 const bodyParser = require("body-parser");
 const ejsMate = require("ejs-mate");
 const morgan = require("morgan");
 const catchAsync = require("./utilities/catchAsync");
 const ExpressError = require("./utilities/ExpressError");
-
+const session = require("express-session");
 const router = express.Router();
 
-const campgroundRouter = require(path.join(__dirname, "./router/campground"));
+const campgroundRouter = require(path.join(__dirname, "router/campground"));
+const reviewRouter = require(path.join(__dirname, "router/review"));
 
 const app = express();
-
+const sessionConfig = {
+  secret: "mySecretCode",
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+  },
+};
+app.use(flash());
+app.use(session(sessionConfig));
+app.use(express.static(path.join(__dirname, "public")));
 app.engine("ejs", ejsMate);
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -31,7 +44,14 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
+
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
+});
 // route handler
+app.use("/campground/:id/review", reviewRouter);
 app.use("/campground", campgroundRouter);
 
 app.get("/", (req, res, next) => {

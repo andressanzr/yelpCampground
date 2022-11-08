@@ -1,13 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
-const Joi = require("joi");
+const flash = require("connect-flash");
 const Campground = require(path.join(__dirname, "../models/campground"));
-const Review = require(path.join(__dirname, "../models/review"));
-const catchAsync = require("../utilities/catchAsync");
-const ExpressError = require("../utilities/ExpressError");
+const catchAsync = require(path.join(__dirname, "../utilities/catchAsync"));
+const ExpressError = require(path.join(__dirname, "../utilities/ExpressError"));
 const { CampgroundJoiSchema, ReviewJoiSchema } = require("../schemas/schemas");
 
+const flashMsgWriter = require("../utilities/flashMsgWriter");
 const router = express.Router();
 
 const validateCampground = (req, res, next) => {
@@ -20,15 +20,7 @@ const validateCampground = (req, res, next) => {
     next();
   }
 };
-const validateReview = (req, res, next) => {
-  const { error } = ReviewJoiSchema.validate(req.body);
-  if (error) {
-    var msg = error.details.map((e) => e.message).join(",");
-    throw new ExpressError(msg, 400);
-  } else {
-    next();
-  }
-};
+
 // get the add camp form
 router.get("/addCamp", (req, res) => {
   res.render("campground/addCamp");
@@ -46,6 +38,7 @@ router.post(
   "/delete/:id",
   catchAsync(async (req, res, next) => {
     await Campground.findByIdAndDelete(req.params.id);
+    writ;
     res.redirect("/campground");
   })
 );
@@ -60,35 +53,7 @@ router.post(
     res.redirect("/campground/");
   })
 );
-// add a review to a camp
-router.post(
-  "/:id/review",
-  validateReview,
-  catchAsync(async (req, res, next) => {
-    const id = req.params.id;
-    const { review } = req.body;
-    const camp = await Campground.findById(id);
-    const rev = new Review(review);
-    camp.reviews.push(rev);
-    await camp.save();
-    await rev.save();
-    res.redirect(`/campground/view/${camp._id}`);
-  })
-);
-// add a review to a camp
-router.post(
-  "/:id/review/delete",
-  catchAsync(async (req, res, next) => {
-    const idCamp = req.params.id;
-    const { id } = req.body.review;
-    const idReview = mongoose.Types.ObjectId.createFromHexString(id);
-    await Campground.findByIdAndUpdate(idCamp, {
-      $pull: { reviews: idReview },
-    });
-    await Review.findOneAndDelete(idReview);
-    res.redirect(`/campground/view/${idCamp}`);
-  })
-);
+
 // add a new camp and save in the db
 router.post(
   "/",
@@ -99,7 +64,7 @@ router.post(
     new Campground(campground)
       .save()
       .then((data) => {
-        console.log(data);
+        flashMsgWriter(req, "success", "Campground added successfully");
         res.redirect(`campground/view/${data._id}`);
       })
       .catch((err) => {
@@ -113,17 +78,20 @@ router.get(
   "/view/:id",
   catchAsync(async (req, res) => {
     let camp;
-    mongoose.isValidObjectId(req.params.id)
-      ? Campground.findById(req.params.id)
-          .populate("reviews")
-          .then((data) => {
-            camp = data;
-            res.render("campground/viewCamp", { camp });
-          })
-          .catch((err) => {
-            res.write("Error: " + err);
-          })
-      : res.redirect("/campground/");
+    if (mongoose.isValidObjectId(req.params.id)) {
+      Campground.findById(req.params.id)
+        .populate("reviews")
+        .then((data) => {
+          camp = data;
+          res.render("campground/viewCamp", { camp });
+        })
+        .catch((err) => {
+          res.write("Error: " + err);
+        });
+    } else {
+      flashMsgWriter(req, "error", "Campground doesn't exist");
+      res.redirect("/campground/");
+    }
   })
 );
 // get all camps
