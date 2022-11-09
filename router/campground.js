@@ -3,11 +3,15 @@ const mongoose = require("mongoose");
 const path = require("path");
 const flash = require("connect-flash");
 const Campground = require(path.join(__dirname, "../models/campground"));
-const catchAsync = require(path.join(__dirname, "../utilities/catchAsync"));
+const {
+  catchAsync,
+  isCampAuthor,
+
+  checkLogin,
+} = require(path.join(__dirname, "../utilities/middleware"));
 const ExpressError = require(path.join(__dirname, "../utilities/ExpressError"));
 const { CampgroundJoiSchema, ReviewJoiSchema } = require("../schemas/schemas");
 
-const flashMsgWriter = require("../utilities/flashMsgWriter");
 const router = express.Router();
 
 const validateCampground = (req, res, next) => {
@@ -22,17 +26,14 @@ const validateCampground = (req, res, next) => {
 };
 
 // get the add camp form
-router.get("/addCamp", (req, res) => {
-  if (!req.isAuthenticated()) {
-    req.flash("error", "You must be signed in");
-    res.redirect("/login");
-  } else {
-    res.render("campground/addCamp");
-  }
+router.get("/addCamp", checkLogin, (req, res) => {
+  res.render("campground/addCamp");
 });
 // get the camp´s edit form
 router.get(
   "/edit/:id",
+  checkLogin,
+  isCampAuthor,
   catchAsync(async (req, res) => {
     const camp = await Campground.findById(req.params.id);
     res.render("campground/editCamp", { camp });
@@ -41,6 +42,8 @@ router.get(
 // delete a camp
 router.post(
   "/delete/:id",
+  checkLogin,
+  isCampAuthor,
   catchAsync(async (req, res, next) => {
     await Campground.findByIdAndDelete(req.params.id);
     res.redirect("/campground");
@@ -49,7 +52,9 @@ router.post(
 
 // update a camp
 router.post(
-  "/:id/update",
+  "/update/:id",
+  checkLogin,
+  isCampAuthor,
   validateCampground,
   catchAsync(async (req, res) => {
     const { id } = req.params;
@@ -61,14 +66,16 @@ router.post(
 // add a new camp and save in the db
 router.post(
   "/",
+  checkLogin,
   validateCampground,
   catchAsync(async (req, res, next) => {
     //const { title, price, description, location, image } = req.body;
     const { campground } = req.body;
+    campground.author = req.user._id;
     new Campground(campground)
       .save()
       .then((data) => {
-        flashMsgWriter(req, "success", "Campground added successfully");
+        req.flash("success", "Campground added successfully");
         res.redirect(`campground/view/${data._id}`);
       })
       .catch((err) => {
@@ -84,7 +91,8 @@ router.get(
     let camp;
     if (mongoose.isValidObjectId(req.params.id)) {
       Campground.findById(req.params.id)
-        .populate("reviews")
+        .populate({ path: "reviews", populate: { path: "author" } })
+        .populate("author")
         .then((data) => {
           camp = data;
           res.render("campground/viewCamp", { camp });
@@ -93,7 +101,7 @@ router.get(
           res.write("Error: " + err);
         });
     } else {
-      flashMsgWriter(req, "error", "Campground doesn't exist");
+      req.flash(req, "error", "Campground doesn't exist");
       res.redirect("/campground/");
     }
   })

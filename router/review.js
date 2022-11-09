@@ -7,8 +7,11 @@ const Review = require(path.join(__dirname, "../models/review"));
 
 const { ReviewJoiSchema } = require("../schemas/schemas");
 
-const flashMsgWriter = require("../utilities/flashMsgWriter");
-const catchAsync = require("../utilities/catchAsync");
+const { catchAsync, isReviewAuthor, checkLogin } = require(path.join(
+  __dirname,
+  "../utilities/middleware"
+));
+
 const ExpressError = require("../utilities/ExpressError");
 const router = express.Router({ mergeParams: true });
 
@@ -25,22 +28,26 @@ const validateReview = (req, res, next) => {
 // add a review to a camp
 router.post(
   "/",
+  checkLogin,
   validateReview,
   catchAsync(async (req, res, next) => {
     const id = req.params.id;
     const { review } = req.body;
     const camp = await Campground.findById(id);
     const rev = new Review(review);
+    rev.author = req.user._id;
     camp.reviews.push(rev);
     await camp.save();
     await rev.save();
-    flashMsgWriter(req, "success", "Review added successfully");
+    req.flash("success", "Review added successfully");
     res.redirect(`/campground/view/${camp._id}`);
   })
 );
 // delete a review from a camp
 router.post(
   "/delete",
+  checkLogin,
+  isReviewAuthor,
   catchAsync(async (req, res, next) => {
     const idCamp = req.params.id;
     const { id } = req.body.review;
@@ -49,7 +56,7 @@ router.post(
       $pull: { reviews: idReview },
     });
     await Review.findOneAndDelete(idReview);
-    flashMsgWriter(req, "success", "Review deleted successfully");
+    req.flash("success", "Review deleted successfully");
     res.redirect(`/campground/view/${idCamp}`);
   })
 );

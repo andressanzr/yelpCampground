@@ -1,18 +1,20 @@
+// package dependencies
 const express = require("express");
 const mongoose = require("mongoose");
 const path = require("path");
 const flash = require("connect-flash");
 const ejsMate = require("ejs-mate");
 const morgan = require("morgan");
-const ExpressError = require("./utilities/ExpressError");
 const session = require("express-session");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
+const ExpressError = require("./utilities/ExpressError");
 
+const User = require(path.join(__dirname, "models/user"));
+// routes
 const campgroundRouter = require(path.join(__dirname, "router/campground"));
 const reviewRouter = require(path.join(__dirname, "router/review"));
 const userRouter = require(path.join(__dirname, "router/user"));
-const User = require(path.join(__dirname, "models/user"));
 
 const app = express();
 const sessionConfig = {
@@ -24,6 +26,7 @@ const sessionConfig = {
     maxAge: 1000 * 60 * 60 * 24 * 7,
   },
 };
+
 app.use(flash());
 app.use(session(sessionConfig));
 app.use(express.static(path.join(__dirname, "public")));
@@ -51,6 +54,7 @@ mongoose
   });
 
 app.use((req, res, next) => {
+  res.locals.currentUser = req.user;
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   next();
@@ -61,11 +65,6 @@ app.use("/campground/:id/review", reviewRouter);
 app.use("/campground", campgroundRouter);
 app.use("/", userRouter);
 
-app.get("/newUser", async (req, res) => {
-  const newUser = new User({ email: "andresd@gm.de", username: "Nandres" });
-  const myUser = await User.register(newUser, "1234");
-  res.send(myUser);
-});
 app.get("/", (req, res, next) => {
   res.redirect("/campground");
 });

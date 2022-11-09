@@ -3,7 +3,8 @@ const path = require("path");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const User = require(path.join(__dirname, "../models/user"));
-const catchAsync = require(path.join(__dirname, "../utilities/catchAsync"));
+
+const { catchAsync } = require(path.join(__dirname, "../utilities/middleware"));
 
 router.get("/register", (req, res, next) => {
   res.render("user/register");
@@ -15,8 +16,11 @@ router.post(
       const { username, email, password } = req.body.user;
       const userNew = new User({ email, username });
       const registeredUser = await User.register(userNew, password);
-      req.flash("success", "Welcome to Yelp " + registeredUser.username);
-      res.redirect("/campground");
+      req.login(registeredUser, (err) => {
+        if (err) return next(err);
+        req.flash("success", "Welcome to Yelp " + registeredUser.username);
+        res.redirect("/campground");
+      });
     } catch (error) {
       req.flash("error", error.message);
       res.redirect("/register");
@@ -34,7 +38,14 @@ router.post(
   }),
   async (req, res, next) => {
     req.flash("success", "Welcome back to Yelp ");
-    res.redirect("/campground");
+    res.redirect("/");
   }
 );
+router.get("/logout", (req, res, next) => {
+  req.logout((err) => {
+    console.log(err);
+    req.flash("success", "Loged out");
+    res.redirect("/campground");
+  });
+});
 module.exports = router;

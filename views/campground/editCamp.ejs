@@ -3,7 +3,7 @@
     <div class="row">
         <h1 class="text-center">Update Campground</h1>
         <div class="col-6 offset-3 mb-3">
-            <form action="/campground/<%= camp._id %>/update" method="post" class="needs-validation" novalidate>
+            <form action="/campground/update/<%= camp._id %>" method="post" class="needs-validation" novalidate>
                 <div class="mb-3">
                     <label class="form-label" for="title">Title:</label><input class="form-control" type="text"
                         name="campground[title]" id="" value="<%= camp.title %>" required>
