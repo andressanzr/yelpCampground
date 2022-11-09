@@ -37,7 +37,12 @@ const seedDb = async () => {
       description:
         "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Id, quaerat ducimus quis nam debitis, sequi reiciendis fugiat recusandae sapiente sunt impedit voluptate officiis laborum reprehenderit eius corporis, accusamus at. Dignissimos.",
       location: `${randomCity.city}, ${randomCity.state}`,
-      image: "https://source.unsplash.com/random/300x300?camping,${i}`",
+      images: [
+        {
+          url: "https://source.unsplash.com/random/300x300?camping",
+          filename: "camping",
+        },
+      ],
       author: "636a576dc2494bba7dcd6be5",
     });
     campSave.save();

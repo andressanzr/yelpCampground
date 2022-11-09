@@ -6,7 +6,7 @@ const CampgroundJoiSchema = Joi.object({
     price: Joi.number().min(0).required(),
     location: Joi.string().required(),
     description: Joi.string().allow(""),
-    image: Joi.string().allow(""),
+    image: Joi.array().allow(""),
     campId: Joi.string().allow(""),
   }),
 });

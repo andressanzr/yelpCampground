@@ -9,6 +9,13 @@ module.exports = {
       func(req, res, next).catch((e) => next(e));
     };
   },
+  checkCampgroundExists: async (req, res, next) => {
+    const targetedCamp = await Campground.findById(req.params.id);
+    if (targetedCamp == null) {
+      req.flash("error", "Campground doesn't exist");
+      res.redirect("/campground/");
+    } else next();
+  },
   isCampAuthor: async (req, res, next) => {
     const targetedCamp = await Campground.findById(req.params.id);
     if (targetedCamp.author.equals(req.user._id)) {
