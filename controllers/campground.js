@@ -22,10 +22,18 @@ module.exports = {
   },
   update: async (req, res) => {
     const { id } = req.params;
+    const geoData = await geoCoder
+      .forwardGeocode({
+        query: req.body.campground.location,
+        limit: 1,
+      })
+      .send();
+
     const updatedCamp = await Campground.findByIdAndUpdate(
       id,
       req.body.campground
     );
+    updatedCamp.geometry = geoData.body.features[0].geometry;
     const files = req.files.map((e) => ({ url: e.path, filename: e.filename }));
     updatedCamp.images.push(...files);
     await updatedCamp.save();
@@ -62,8 +70,6 @@ module.exports = {
         .populate({ path: "reviews", populate: { path: "author" } })
         .populate("author")
         .then((camp) => {
-          console.log(camp);
-          console.log(camp.geometry.coordinates);
           res.render("campground/viewCamp", { camp });
         })
         .catch((err) => {

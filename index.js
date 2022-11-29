@@ -69,7 +69,7 @@ app.use("/campground", campgroundRouter);
 app.use("/", userRouter);
 
 app.get("/", (req, res, next) => {
-  res.redirect("/campground");
+  res.render("home");
 });
 //  not found route handler
 app.all("*", (req, res, next) => {

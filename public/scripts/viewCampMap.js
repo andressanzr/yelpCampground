@@ -3,7 +3,7 @@ var camp = JSON.parse(campJSON);
 var coordinates = camp.geometry.coordinates;
 const map = new mapboxgl.Map({
   container: "map", // container ID
-  style: "mapbox://styles/mapbox/light-v11", // style URL
+  style: "mapbox://styles/mapbox/light-v11",
   center: coordinates, // starting position [lng, lat]
   zoom: 9, // starting zoom
 });

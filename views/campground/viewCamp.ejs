@@ -1,6 +1,5 @@
 <% layout("layouts/boilerplate")%>
-
-    <script>const mapToken = "<%-process.env.MAPBOX_TOKEN%>"; var campJSON = '<%- JSON.stringify(camp) %>'</script>
+    <script>const mapToken = "<%=process.env.MAPBOX_TOKEN%>"; const campJSON = `<%-JSON.stringify(camp)%>`;</script>
     <div class="container-md">
         <div class="row">
             <div class="col-lg-6 col-md-10 col-sm-12">
@@ -59,7 +58,7 @@
                                         Suggested by: <%= camp.author.username%>
                                     </li>
                                 </ul>
-                                <div id="map" style="width: 100%; height: 400px;"></div>
+
                                 <% if(currentUser && currentUser._id.equals(camp.author._id)){ %>
                                     <div class="card-body">
                                         <a href="/campground/edit/<%=camp._id%>"><button
@@ -73,6 +72,7 @@
             </div>
 
             <div class="col-lg-6 col-md-10 col-sm-12  mt-3 mb-3">
+                <div id="map" style="width: 100%; height: 400px;"></div>
                 <% if(currentUser){ %>
                     <form action="/campground/<%=camp._id%>/review" method="post" class="mb-3 needs-validation"
                         novalidate>

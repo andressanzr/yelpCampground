@@ -30,7 +30,7 @@ const randomNum = (max) => {
 const seedDb = async () => {
   await Review.deleteMany();
   await Campground.deleteMany();
-  for (let index = 0; index < 50; index++) {
+  for (let index = 0; index < 350; index++) {
     const randomPlace = places[randomNum(places.length)];
     const randomDescriptor = descriptors[randomNum(descriptors.length)];
     const randomCity = cities[randomNum(1000)];
@@ -60,7 +60,7 @@ const seedDb = async () => {
     });
 
     campSave.save();
-    index == 49 ? console.log("finished inserting") : "";
+    index == 349 ? console.log("finished inserting") : "";
   }
 };
 
