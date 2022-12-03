@@ -2,12 +2,15 @@ mapboxgl.accessToken = mapToken;
 var camp = JSON.parse(campJSON);
 var coordinates = camp.geometry.coordinates;
 const map = new mapboxgl.Map({
-  container: "map", // container ID
+  container: "viewCampMap", // container ID
   style: "mapbox://styles/mapbox/light-v11",
   center: coordinates, // starting position [lng, lat]
   zoom: 9, // starting zoom
 });
-const marker = new mapboxgl.Marker()
+
+const marker = new mapboxgl.Marker({
+  color: "#3D5AFE",
+})
   .setLngLat(coordinates)
   .setPopup(
     new mapboxgl.Popup({ offset: 50 }).setHTML(
@@ -15,3 +18,4 @@ const marker = new mapboxgl.Marker()
     )
   )
   .addTo(map);
+map.addControl(new mapboxgl.NavigationControl());

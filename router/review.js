@@ -33,5 +33,10 @@ router.post(
   isReviewAuthor,
   catchAsync(reviewController.delete)
 );
+// error handler
+router.use((err, req, res, next) => {
+  const { statusCode = 500, message = "Unexpected error" } = err;
+  res.status(statusCode).render("error", { err });
+});
 
 module.exports = router;

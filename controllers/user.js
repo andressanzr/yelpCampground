@@ -1,11 +1,21 @@
+const path = require("path");
+
+const User = require(path.join(__dirname, "../models/user"));
+
 module.exports = {
   register: async (req, res, next) => {
     try {
+      console.log("user: " + User.toString());
       const { username, email, password } = req.body.user;
-      const userNew = new User({ email, username });
-      const registeredUser = await User.register(userNew, password);
+      console.log(username, email, password);
+      const registeredUser = await User.register(
+        new User({ email, username }),
+        password
+      );
+
       req.login(registeredUser, (err) => {
         if (err) return next(err);
+        console.log("toll");
         req.flash("success", "Welcome to Yelp " + registeredUser.username);
         res.redirect("/campground");
       });

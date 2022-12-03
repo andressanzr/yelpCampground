@@ -1,3 +1,4 @@
+const { default: mongoose } = require("mongoose");
 const path = require("path");
 const Campground = require(path.join(__dirname, "../models/campground"));
 const Review = require(path.join(__dirname, "../models/review"));
@@ -10,11 +11,16 @@ module.exports = {
     };
   },
   checkCampgroundExists: async (req, res, next) => {
-    const targetedCamp = await Campground.findById(req.params.id);
-    if (targetedCamp == null) {
-      req.flash("error", "Campground doesn't exist");
+    if (mongoose.isValidObjectId(req.params.id)) {
+      const targetedCamp = await Campground.findById(req.params.id);
+      if (targetedCamp == null) {
+        req.flash("error", "Campground doesn't exist");
+        res.redirect("/campground/");
+      } else next();
+    } else {
+      req.flash("error", "Campground Id not valid");
       res.redirect("/campground/");
-    } else next();
+    }
   },
   isCampAuthor: async (req, res, next) => {
     const targetedCamp = await Campground.findById(req.params.id);

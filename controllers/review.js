@@ -7,6 +7,7 @@ module.exports = {
     const id = req.params.id;
     const { review } = req.body;
     const camp = await Campground.findById(id);
+    review.body = encodeURI(review.body.trim());
     const rev = new Review(review);
     rev.author = req.user._id;
     camp.reviews.push(rev);
