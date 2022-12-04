@@ -15,6 +15,10 @@ const LocalStrategy = require("passport-local");
 const ExpressError = require("./utilities/ExpressError");
 const mongoSanitize = require("express-mongo-sanitize");
 
+const MongoStore = require("connect-mongo");
+
+const dbUrl = process.env.DB_URL;
+
 const User = require(path.join(__dirname, "models/user"));
 
 // routes
@@ -49,7 +53,18 @@ const connectSrcUrls = [
 const fontSrcUrls = [];
 
 const app = express();
+
+const store = MongoStore.create({
+  mongoUrl: dbUrl,
+  crypto: { secret: "mySecretCode" },
+  touchAfter: 24 * 3600,
+});
+
+store.on("error", function (e) {
+  console.log("session error: " + e);
+});
 const sessionConfig = {
+  store,
   secret: "mySecretCode",
   resave: false,
   saveUninitialized: true,
@@ -95,11 +110,11 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 // db url
-const url = "mongodb://localhost:27017/yelpCamp";
+//const url = "mongodb://localhost:27017/yelpCamp";
 
 // connection to db
 mongoose
-  .connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(dbUrl, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log("db connected");
   })
@@ -128,6 +143,7 @@ app.all("*", (req, res, next) => {
 });
 // error handler
 app.use((err, req, res, next) => {
+  console.log(err);
   const { statusCode = 500, message = "Unexpected error" } = err;
   res.status(statusCode).render("error", { err });
 });

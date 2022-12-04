@@ -1,6 +1,6 @@
 body {
     height: 100vh;
-    background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.6)),url("https://mediafiles.urlaubsguru.de/wp-content/uploads/2015/04/three-friends-camping-on-mountain-at-sunset-istock_48107094_xlarge-2.jpg");
+    background-image: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.6)),url("/img/bgfoto.jpg");
     background-position: center;
     background-size: cover;
     text-shadow: 0 0.05rem 0.1rem rgba(0,0,0,0.5);
